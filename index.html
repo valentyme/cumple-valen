@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cumple Valen 21</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Itim&family=Rozha+One&family=Fraunces:opsz,wght@9..144,400;9..144,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rosa:#f4a0ab;
+    --rosa-linea:#e98c9a;
+    --bordo:#8e2848;
+    --marron:#541010;
+    --W:min(100vw,460px,calc(100dvh * 702 / 873));
+    --tx:calc(var(--W) * .054); /* tamaño de texto único: ubicación, detalles, click y confirmar */
+    --f-titulo:'Itim','Comic Sans MS',cursive;
+    --f-texto:'Rozha One',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;width:100%}
+  body{
+    background-color:var(--rosa);
+    background-image:
+      linear-gradient(var(--rosa-linea) 2px, transparent 2px),
+      linear-gradient(90deg, var(--rosa-linea) 2px, transparent 2px);
+    background-size:44px 44px;
+    font-family:var(--f-texto);
+    color:var(--bordo);
+    overflow:hidden;
+  }
+  img{display:block;user-select:none;-webkit-user-drag:none}
+
+  /* Cada vista ocupa toda la pantalla y centra su contenido */
+  .vista{
+    position:fixed;inset:0;width:100%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;
+    opacity:0;visibility:hidden;
+    transition:opacity .6s ease, visibility .6s;
+    overflow-y:auto;overflow-x:hidden;
+  }
+  .vista.activa{opacity:1;visibility:visible}
+
+  /* Recorta los márgenes transparentes de los PNG (exportados en hoja A4 completa) */
+  .recorte{position:relative;overflow:hidden}
+  .recorte img{
+    position:absolute;max-width:none;height:auto;
+    width:calc(1240 / var(--w) * 100%);
+    left:calc(var(--x) / var(--w) * -100%);
+    top:calc(var(--y) / var(--h) * -100%);
+  }
+
+  /* ---------- VISTA 1: sobre ---------- */
+  #v1{gap:clamp(14px,4dvh,36px);padding:3dvh 6vw;cursor:pointer}
+  #v1 h1{
+    font-family:var(--f-titulo);font-weight:400;
+    font-size:clamp(40px,min(14vw,8.5dvh),80px);line-height:1;
+    color:var(--marron);
+    -webkit-text-stroke:.6px var(--marron);
+  }
+  .sobre{
+    position:relative;flex:none;
+    width:min(84vw,420px,calc(44dvh * 1.39));
+  }
+  .sobre .recorte{transition:opacity .35s ease}
+  .sobre .abierto{position:absolute;left:1.5%;bottom:-1%;width:97%;opacity:0}
+  .sobre.mueve{animation:meneo 2.6s ease-in-out infinite}
+  .sobre.abriendo{animation:none;transform:scale(1.08);transition:transform .6s ease}
+  .sobre.abriendo .cerrado{opacity:0}
+  .sobre.abriendo .abierto{opacity:1}
+  #v1 p{
+    font-family:var(--f-texto);font-weight:400;
+    font-size:var(--tx);line-height:1;color:var(--bordo);
+  }
+  @keyframes meneo{
+    0%,100%{transform:rotate(0) scale(1)}
+    20%{transform:rotate(-3deg) scale(1.02)}
+    40%{transform:rotate(3deg) scale(1.02)}
+    60%{transform:rotate(-2deg) scale(1.01)}
+    80%{transform:rotate(1.5deg)}
+  }
+
+  /* ---------- VISTA 2: invitación ---------- */
+  #v2{--W:min(100vw,460px,calc(100dvh * 702 / 873))}
+  #v2 .escenario{
+    position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%);   /* centrado exacto en la pantalla */
+    width:var(--W);
+    height:calc(var(--W) * 873 / 702);
+    container-type:inline-size;
+  }
+  #v2 .el{position:absolute}
+  .sobre-chico{left:59.8%;top:2.3%;width:33%}
+  .tarjeta{
+    left:13%;top:30%;width:45.6%;height:auto;
+    transform:rotate(-13.5deg);
+    filter:drop-shadow(0 .8cqw 1.6cqw rgba(84,16,16,.25));
+  }
+  .links{
+    left:56%;top:36%;width:40%;
+    display:flex;flex-direction:column;gap:3.6cqw;align-items:flex-end;
+  }
+  .links .fila{display:flex;align-items:center;gap:2.8cqw}
+  .links .estrella{font-size:4.6cqw;color:var(--bordo);line-height:1;pointer-events:none;text-decoration:none}
+  .links a{
+    font-family:var(--f-texto);font-weight:400;
+    font-size:var(--tx);color:var(--bordo);line-height:1.1;
+    text-decoration:none;
+  }
+  .vinilos{left:57.7%;top:62%;width:37%}
+  .confirmar{
+    left:0;right:0;top:91%;text-align:center;
+    font-family:var(--f-texto);font-weight:400;
+    line-height:1;
+  }
+  .confirmar a{display:inline-block;font-size:var(--tx);color:var(--bordo);text-decoration:none;white-space:nowrap}
+  #v2.activa .tarjeta{animation:entra .9s .15s cubic-bezier(.2,.8,.3,1) both}
+  #v2.activa .sobre-chico{animation:cae .8s .05s ease-out both}
+  #v2.activa .vinilos{animation:cae .8s .35s ease-out both}
+  #v2.activa .links,#v2.activa .confirmar{animation:aparece .8s .6s ease both}
+  @keyframes entra{from{opacity:0;transform:translateY(8cqw) rotate(-13.5deg) scale(.9)}to{opacity:1;transform:rotate(-13.5deg)}}
+  @keyframes cae{from{opacity:0;transform:translateY(-4cqw)}to{opacity:1;transform:none}}
+  @keyframes aparece{from{opacity:0}to{opacity:1}}
+
+  /* ---------- VISTAS 3 y 4 ---------- */
+  .pagina{
+    --W:min(92vw,460px,calc(100dvh * .7));
+    position:relative;flex:none;width:var(--W);
+    container-type:inline-size;
+    display:flex;flex-direction:column;align-items:center;
+    margin:auto 0;      /* centra en vertical, y si no entra en pantalla arranca desde arriba */
+    padding:4dvh 0;
+  }
+  .pagina h2{
+    font-family:var(--f-titulo);font-weight:400;
+    font-size:12.5cqw;line-height:1;color:var(--marron);
+    -webkit-text-stroke:.6px var(--marron);
+    margin-bottom:6cqw;
+  }
+  .volver{
+    margin-top:7cqw;
+    font-family:var(--f-texto);font-weight:400;
+    font-size:calc(var(--tx) * .8);color:var(--bordo);text-decoration:none;
+  }
+  .vista.activa .pagina{animation:aparece .7s .1s ease both}
+
+  /* Ubicación */
+  .mapa{
+    display:block;position:relative;width:100%;aspect-ratio:1613/1064;
+    filter:drop-shadow(0 1.2cqw 2.4cqw rgba(84,16,16,.22));
+  }
+  .mapa .recorte{position:absolute;inset:0}
+  .mapa svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .pin-salto{animation:salto 1.8s ease-in-out infinite}
+  @keyframes salto{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+  .direccion{
+    margin-top:6cqw;
+    font-family:var(--f-texto);font-weight:400;
+    font-size:var(--tx);line-height:1.1;color:var(--bordo);text-decoration:none;
+  }
+
+  /* Detalles */
+  .p4{padding-bottom:4dvh}
+  .tarjeta-wrap{position:relative;width:84%}
+  .card4{
+    position:relative;overflow:hidden;container-type:inline-size;
+    background:#efece8;
+    filter:drop-shadow(0 1.2cqw 2.4cqw rgba(84,16,16,.2));
+  }
+  .card4 .papel img{
+    position:absolute;max-width:none;height:auto;
+    width:140cqw;left:-20cqw;top:-32.7cqw;
+  }
+  .texto4{
+    position:relative;
+    padding:7cqw 6.5cqw 15cqw;
+    font-family:'Fraunces',Georgia,serif;font-weight:400;
+    font-size:4.6cqw;line-height:1.5;color:var(--bordo);
+    letter-spacing:.01em;
+    text-align:justify;
+  }
+  .texto4 p + p{margin-top:.6em}
+  .texto4 .centro{text-align:center}
+  .texto4 strong{font-weight:700;color:var(--marron)}
+  .texto4 .corazon{font-family:Arial,sans-serif}
+  .estrella4{
+    position:absolute;right:-10cqw;top:-13cqw;width:22cqw;
+    transform:rotate(6deg);
+  }
+  .vinilo4{
+    position:absolute;left:-12cqw;top:calc(100% - 10cqw);width:18cqw;
+    transform:rotate(250deg);
+    filter:drop-shadow(0 .8cqw 1.4cqw rgba(84,16,16,.3));
+  }
+</style>
+</head>
+<body>
+
+<!-- VISTA 1 -->
+<section class="vista activa" id="v1">
+  <h1>Estás invitado</h1>
+  <div class="sobre mueve" id="sobre">
+    <div class="recorte cerrado" style="aspect-ratio:1145/825;--w:1145;--h:825;--x:45;--y:460">
+      <img src="img/sobre-cerrado.png" alt="Sobre cerrado con sello de corazón">
+    </div>
+    <div class="recorte abierto" style="aspect-ratio:1110/1195;--w:1110;--h:1195;--x:65;--y:275">
+      <img src="img/sobre-abierto.png" alt="">
+    </div>
+  </div>
+  <p>Hacé click para abrir el sobre</p>
+</section>
+
+<!-- VISTA 2 -->
+<section class="vista" id="v2">
+  <div class="escenario">
+    <div class="el recorte sobre-chico" style="aspect-ratio:1110/1195;--w:1110;--h:1195;--x:65;--y:275">
+      <img src="img/sobre-abierto.png" alt="">
+    </div>
+    <img class="el tarjeta" src="img/invitacion.png" alt="Cumple de Valen, 21 años. 6 de noviembre, 22 hs.">
+    <nav class="el links">
+      <div class="fila"><span class="estrella" aria-hidden="true">✳</span><a href="#ubicacion">ubicación</a></div>
+      <div class="fila"><span class="estrella" aria-hidden="true">✳</span><a href="#detalles">detalles</a></div>
+    </nav>
+    <div class="el recorte vinilos" style="aspect-ratio:1200/970;--w:1200;--h:970;--x:20;--y:390">
+      <img src="img/vinilos.png" alt="">
+    </div>
+    <div class="el confirmar" id="confirmar">
+      <a href="https://wa.me/5491162167829?text=holaaa%20voyyyyyyyy%20confirmoooo" target="_blank" rel="noopener">Por favor confirmar !</a>
+    </div>
+  </div>
+</section>
+
+<!-- VISTA 3: ubicación -->
+<section class="vista" id="v3">
+  <div class="pagina">
+    <h2>Ubicación</h2>
+
+    <a class="mapa maps" target="_blank" rel="noopener" aria-label="Abrir la ubicación en Google Maps">
+      <div class="recorte" style="aspect-ratio:1613/1064;--w:1240;--h:818;--x:0;--y:290">
+        <img src="img/papel.png" alt="">
+      </div>
+      <svg viewBox="0 0 1613 1064" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mapa de la zona de Ocantos 842, Monte Grande">
+        <defs>
+          <pattern id="puntos" width="41" height="41" patternUnits="userSpaceOnUse" x="14" y="12">
+            <circle cx="5" cy="5" r="5.5" fill="#541010" opacity=".9"/>
+          </pattern>
+          <clipPath id="recMapa"><rect x="72" y="134" width="1481" height="798" rx="6"/></clipPath>
+        </defs>
+
+        <!-- marco de puntos y fondo del mapa -->
+        <rect width="1613" height="1064" fill="url(#puntos)"/>
+        <rect x="72" y="134" width="1481" height="798" rx="6" fill="#f7f1ee"/>
+
+        <g clip-path="url(#recMapa)" fill="none">
+          <!-- calles -->
+          <g stroke="#f4a0ab" stroke-linecap="butt">
+            <line x1="1630" y1="236" x2="335"  y2="1048" stroke-width="40"/><!-- Dolores G. Ocantos -->
+            <line x1="1234" y1="10"  x2="-27"  y2="835"  stroke-width="34"/><!-- Independencia -->
+            <line x1="1700" y1="490" x2="800"  y2="980"  stroke-width="34"/>
+            <line x1="1300" y1="100" x2="1545" y2="455"  stroke-width="30"/><!-- Luis de Sarro -->
+            <line x1="816"  y1="87"  x2="1252" y2="743"  stroke-width="30"/><!-- Enrique Insúa -->
+            <line x1="343"  y1="65"  x2="880"  y2="885"  stroke-width="30"/><!-- Mariano Castex -->
+            <line x1="30"   y1="270" x2="500"  y2="1010" stroke-width="30"/><!-- 9 de Abril -->
+            <line x1="1268" y1="740" x2="1380" y2="932"  stroke-width="24"/>
+          </g>
+          <!-- vías del tren -->
+          <g stroke="#541010">
+            <line x1="1650" y1="455" x2="820" y2="975" stroke-width="3"/>
+            <line x1="1650" y1="455" x2="820" y2="975" stroke-width="16" stroke-dasharray="3 15"/>
+          </g>
+
+          <!-- nombres de calles -->
+          <g fill="#8e2848" font-family="'Rozha One',Georgia,serif" font-size="27" text-anchor="middle">
+            <text transform="translate(964 653) rotate(-32.5)" dy="9">Dolores G. Ocantos</text>
+            <text transform="translate(342 593) rotate(-32.5)" dy="9">Independencia</text>
+            <text transform="translate(1034 415) rotate(57)" dy="9">Enrique Insúa</text>
+            <text transform="translate(585 434) rotate(57)" dy="9">Mariano Castex</text>
+            <text transform="translate(218 566) rotate(57)" dy="9">9 de Abril</text>
+            <text transform="translate(1410 260) rotate(57)" dy="9">Luis de Sarro</text>
+          </g>
+        </g>
+
+        <!-- pin de la casa -->
+        <g transform="translate(910 582)">
+          <ellipse cx="0" cy="2" rx="30" ry="10" fill="#541010" opacity=".25"/>
+          <g class="pin-salto">
+            <path d="M0 0 C-14 -24 -42 -44 -42 -84 a42 42 0 1 1 84 0 C42 -44 14 -24 0 0Z" fill="#8e2848"/>
+            <path d="M0 -58 C-30 -78 -26 -108 -12 -108 c6 0 10 4 12 9 c2 -5 6 -9 12 -9 c14 0 18 30 -12 50Z" fill="#f7f1ee"/>
+          </g>
+        </g>
+      </svg>
+    </a>
+
+    <a class="direccion maps" target="_blank" rel="noopener">Ocantos 842, Monte Grande.</a>
+    <a class="volver" href="#invitacion">← volver</a>
+  </div>
+</section>
+
+<!-- VISTA 4: detalles -->
+<section class="vista" id="v4">
+  <div class="pagina p4">
+    <h2>Detalles</h2>
+
+    <div class="tarjeta-wrap">
+      <div class="card4">
+        <div class="papel"><img src="img/papel.png" alt=""></div>
+        <div class="texto4">
+          <p>Buenas! La idea es hacer una chupijuntada en mi casa, donde <strong>cada uno trae lo que toma</strong>, ponemos musica y pasamos el rato!</p>
+          <p class="centro">Va a haber torta y papitas pero <strong>vengan comidos!!</strong><br><strong>De 22 hs en adelante.</strong></p>
+          <p>Mi cumple es el 10 de noviembre pero por los paciales siempre puede ser celebrado antes <span class="corazon">♥</span></p>
+        </div>
+      </div>
+
+      <div class="recorte estrella4" style="aspect-ratio:1180/1280;--w:1180;--h:1280;--x:25;--y:185">
+        <img src="img/estrella.png" alt="">
+      </div>
+      <div class="recorte vinilo4" style="aspect-ratio:950/1485;--w:950;--h:1485;--x:155;--y:85">
+        <img src="img/vinilo.png" alt="">
+      </div>
+    </div>
+
+    <a class="volver" href="#invitacion">← volver</a>
+  </div>
+</section>
+
+<script>
+  const vistas = document.querySelectorAll('.vista');
+
+  // Link de Google Maps de la casa (cambialo acá si querés usar tu link exacto)
+  const MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=Ocantos+842%2C+Monte+Grande%2C+Buenos+Aires';
+  document.querySelectorAll('a.maps').forEach(a => a.href = MAPS_URL);
+
+  // Navegación entre vistas con el hash de la URL (así funciona el botón "atrás" del celu)
+  const RUTAS = { invitacion:'v2', ubicacion:'v3', detalles:'v4' };
+
+  function ir(id){
+    vistas.forEach(v => v.classList.toggle('activa', v.id === id));
+    document.getElementById(id).scrollTop = 0;
+  }
+
+  const sobre = document.getElementById('sobre');
+  let abierto = false;
+  function resetSobre(){
+    abierto = false;
+    sobre.classList.remove('abriendo');
+    sobre.classList.add('mueve');
+  }
+
+  function mostrar(){
+    const id = RUTAS[location.hash.slice(1)] || 'v1';
+    if (id === 'v1') resetSobre();
+    ir(id);
+    alinearTodo();
+  }
+  window.addEventListener('hashchange', mostrar);
+
+  // Tocar el sobre: se abre y pasa a la invitación
+  document.getElementById('v1').addEventListener('click', () => {
+    if (abierto) return;
+    abierto = true;
+    sobre.classList.remove('mueve');
+    sobre.classList.add('abriendo');
+    setTimeout(() => { location.hash = 'invitacion'; }, 750);
+  });
+
+  // Apoya los textos "sobre" una línea de la cuadrícula (líneas cada 44px)
+  function alinearALinea(el){
+    el.style.transform = '';
+    const r = el.getBoundingClientRect();
+    if (!r.height) return;
+    const base = r.top + r.height * 0.82;        // altura aprox. de la base de las letras
+    const linea = Math.round((base + 1) / 44) * 44 + 1;
+    el.style.transform = 'translateY(' + (linea - 2 - base) + 'px)';
+  }
+  function alinearTodo(){
+    alinearALinea(document.querySelector('#v1 p'));
+    alinearALinea(document.getElementById('confirmar'));
+  }
+  window.addEventListener('load', alinearTodo);
+  window.addEventListener('resize', alinearTodo);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(alinearTodo);
+
+  // Precarga de imágenes para que no haya demora al tocar
+  ['sobre-cerrado','sobre-abierto','invitacion','vinilos','papel','estrella','vinilo'].forEach(n => {
+    const i = new Image(); i.src = 'img/' + n + '.png';
+  });
+
+  mostrar();
+</script>
+</body>
+</html>
